@@ -46,3 +46,30 @@ DATASETS = {
     },
 }
 
+MODELS = {
+    "1": "Logistic Regression",
+    "2": "Decision Tree",
+    "3": "K-Nearest Neighbors",
+}
+
+
+# Part 03 - Choose a menu option
+# - Show the menu once, then keep asking until an answer is valid.
+# - Return the chosen key; return None when the user wants to exit.
+def choose_option(title, options, prompt):
+    """Display option names and return a valid menu key, or None to quit."""
+    print(f"\n{title}")
+    for key, name in options.items():
+        print(f"{key}. {name}")
+    print("q. Exit")
+    # - Build the list of allowed keys for the error message.
+    valid_choices = ", ".join(options)
+
+    while True:
+        # - Remove outer spaces and ignore capital letters.
+        choice = input(prompt).strip().lower()
+        if choice in {"q", "quit", "exit"}:
+            return None
+        if choice in options:
+            return choice
+        print(f"Invalid selection. Please enter {valid_choices}, or q to exit.")
