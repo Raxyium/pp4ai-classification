@@ -73,3 +73,58 @@ def choose_option(title, options, prompt):
         if choice in options:
             return choice
         print(f"Invalid selection. Please enter {valid_choices}, or q to exit.")
+
+# Part 04 - Repeat or stop
+# - Convert accepted yes/no text into True or False for main().
+# - An invalid answer stays in this loop and gets another attempt.
+def ask_repeat():
+    """Ask until the user enters an accepted yes/no answer."""
+    while True:
+        answer = input("\nRun another experiment? (yes/no): ").strip().lower()
+        if answer in {"yes", "y"}:
+            return True
+        if answer in {"no", "n"}:
+            return False
+        print("Invalid answer. Please enter yes/y or no/n.")
+
+
+# Part 05 - Load the CSV
+# - Join the data folder and filename, then read a pandas table.
+# - Explain expected file problems and reject unusable tables.
+def load_dataset(dataset, data_dir=DATA_DIR):
+    """Read a supplied CSV and turn expected file problems into clear errors."""
+    path = Path(data_dir) / dataset["filename"]
+    try:
+        dataframe = pd.read_csv(path)
+    except FileNotFoundError as error:
+        raise ValueError(
+            f"CSV file not found: {path}. Restore it in the data folder."
+        ) from error
+    except (OSError, UnicodeError, pd.errors.ParserError, pd.errors.EmptyDataError) as error:
+        raise ValueError(f"Cannot read CSV file {path}: {error}") from error
+
+    # - A readable file still needs rows and a target column.
+    if dataframe.empty:
+        raise ValueError(f"CSV file {path.name} has no data rows.")
+    if TARGET_COLUMN not in dataframe.columns:
+        raise ValueError(f"CSV file {path.name} has no '{TARGET_COLUMN}' column.")
+    return dataframe
+
+
+# Part 06 - Describe the data
+# - Print table size, class counts, and missing counts for each column.
+# - This helps us inspect the data before training; it changes no values.
+def show_summary(dataframe, dataset):
+    """Print dimensions, class counts, and missing counts for every column."""
+    print(f"\nDataset summary: {dataset['name']}")
+    print(f"Rows: {len(dataframe)} | Columns: {len(dataframe.columns)}")
+    print(f"Target column: {TARGET_COLUMN}")
+    print("Class counts:")
+    # - Include missing labels in the count so problems stay visible.
+    counts = dataframe[TARGET_COLUMN].value_counts(dropna=False).sort_index()
+    for label, count in counts.items():
+        meaning = dataset["labels"].get(label, "unknown or missing label")
+        print(f"  {label} ({meaning}): {count}")
+    print("Missing values per column:")
+    for column, count in dataframe.isna().sum().items():
+        print(f"  {column}: {count}")
