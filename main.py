@@ -111,3 +111,23 @@ def create_pipeline(model_key):
         steps.append(("scaler", StandardScaler()))
     steps.append(("classifier", classifiers[model_key]))
     return Pipeline(steps)
+
+# Part 07 - Train on one partition and evaluate the other
+# - Stratification keeps class proportions similar; seed 42 repeats the split.
+# - fit() learns medians, scaling, and the classifier from training data only.
+# - predict() applies the learned steps to unseen test rows.
+def train_and_evaluate(features, labels, model_key):
+    train_features, test_features, train_labels, test_labels = train_test_split(
+        features, labels, test_size=TEST_SIZE, random_state=RANDOM_SEED, stratify=labels)
+    if train_features.isna().all().any():
+        raise ValueError("A training column is entirely missing; no median is available.")
+    if model_key == "3" and len(train_labels) < NEIGHBORS:
+        raise ValueError(f"KNN needs at least {NEIGHBORS} training rows.")
+    pipeline = create_pipeline(model_key)
+    pipeline.fit(train_features, train_labels)
+    predictions = pipeline.predict(test_features)
+    return {"accuracy": float(accuracy_score(test_labels, predictions)),
+            "correct_count": int((predictions == test_labels.to_numpy()).sum()),
+            "train_count": len(train_labels), "test_count": len(test_labels),
+            "pipeline": pipeline}
+
