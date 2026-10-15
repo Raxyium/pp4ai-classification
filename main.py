@@ -93,3 +93,21 @@ def load_and_prepare(dataset, data_dir=DATA_DIR):
     if min(test_count, len(labels) - test_count) < len(counts):
         raise ValueError("Insufficient data for an 80/20 stratified split.")
     return features, labels.astype(int)
+
+# Part 06 - Create the preprocessing and classifier
+# - Always fill missing features with medians.
+# - Scale Logistic Regression and KNN; trees do not need scaling here.
+# - These objects learn only when fit() is called on training rows.
+def create_pipeline(model_key):
+    if model_key not in MODELS:
+        raise ValueError("Unsupported model selection.")
+    classifiers = {
+        "1": LogisticRegression(max_iter=2000, random_state=RANDOM_SEED),
+        "2": DecisionTreeClassifier(random_state=RANDOM_SEED),
+        "3": KNeighborsClassifier(n_neighbors=NEIGHBORS),
+    }
+    steps = [("imputer", SimpleImputer(strategy="median"))]
+    if model_key != "2":
+        steps.append(("scaler", StandardScaler()))
+    steps.append(("classifier", classifiers[model_key]))
+    return Pipeline(steps)
