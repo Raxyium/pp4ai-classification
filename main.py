@@ -155,6 +155,7 @@ def main(data_dir=DATA_DIR):
                 )
                 print(f"Test accuracy: {result['accuracy']:.2%}")
                 print(f"Correct predictions: {result['correct_count']} / {result['test_count']}")
+                           save_result(dataset, model_key, result)
             except ValueError as error:
                 print(f"Experiment could not run: {error}\nReturning to the dataset menu.")
                 continue
@@ -164,6 +165,23 @@ def main(data_dir=DATA_DIR):
         print("\nInput ended. Exiting the application.")
     print("Goodbye!")
 
-# Start the application only when this file is run directly.
+# Part 09 - Save each completed experiment to a CSV file
+# - Create one row containing the dataset, model, accuracy, and row counts.
+# - mode="a" adds a new row instead of replacing earlier results.
+# - Write column headings only for a new or empty file; index=False skips row numbers.
+# - If saving fails, explain the error and let the application continue.
+def save_result(dataset, model_key, result):
+    path = DATA_DIR.parent / "experiment_results.csv"
+    row = {"dataset": dataset["name"], "model": MODELS[model_key],
+           "accuracy": result["accuracy"], "train_count": result["train_count"],
+           "test_count": result["test_count"], "correct_count": result["correct_count"]}
+    try:
+        needs_header = not path.exists() or path.stat().st_size == 0
+        pd.DataFrame([row]).to_csv(path, mode="a", header=needs_header, index=False)
+        print(f"Results saved to {path.name}.")
+    except OSError as error:
+        print(f"Could not save results to {path.name}: {error}")
+
+# Keep this launch block last so every function above is defined before main() starts.
 if __name__ == "__main__":
     main()
