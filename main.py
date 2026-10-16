@@ -155,7 +155,7 @@ def main(data_dir=DATA_DIR):
                 )
                 print(f"Test accuracy: {result['accuracy']:.2%}")
                 print(f"Correct predictions: {result['correct_count']} / {result['test_count']}")
-                           save_result(dataset, model_key, result)
+                save_result(dataset, model_key, result)
             except ValueError as error:
                 print(f"Experiment could not run: {error}\nReturning to the dataset menu.")
                 continue
