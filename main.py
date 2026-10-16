@@ -131,3 +131,39 @@ def train_and_evaluate(features, labels, model_key):
             "train_count": len(train_labels), "test_count": len(test_labels),
             "pipeline": pipeline}
 
+# Part 08 - Run the menus, display results, and handle expected errors
+# - Call the small functions in order and repeat when the user answers yes.
+# - A data problem restarts the menu; q, Ctrl+C, or end of input exits cleanly.
+def main(data_dir=DATA_DIR):
+    print("Welcome to the Classification Application")
+    dataset_names = {key: dataset["name"] for key, dataset in DATASETS.items()}
+    try:
+        while True:
+            dataset_key = choose_option("dataset", dataset_names)
+            if dataset_key is None:
+                break
+            dataset = DATASETS[dataset_key]
+            try:
+                features, labels = load_and_prepare(dataset, data_dir)
+                model_key = choose_option("model", MODELS)
+                if model_key is None:
+                    break
+                result = train_and_evaluate(features, labels, model_key)
+                print(f"\nDataset: {dataset['name']} | Model: {MODELS[model_key]}")
+                print(
+                    f"Training instances: {result['train_count']} | Test instances: {result['test_count']}"
+                )
+                print(f"Test accuracy: {result['accuracy']:.2%}")
+                print(f"Correct predictions: {result['correct_count']} / {result['test_count']}")
+            except ValueError as error:
+                print(f"Experiment could not run: {error}\nReturning to the dataset menu.")
+                continue
+            if not ask_repeat():
+                break
+    except (EOFError, KeyboardInterrupt):
+        print("\nInput ended. Exiting the application.")
+    print("Goodbye!")
+
+# Start the application only when this file is run directly.
+if __name__ == "__main__":
+    main()
