@@ -25,6 +25,19 @@ experiment, `no` to finish, or `q` at either menu to exit. Invalid selections
 prompt another attempt. File and data errors produce a message and return to
 the dataset menu.
 
+## Saving experiment results
+
+Each completed experiment appends a row to `experiment_results.csv` beside
+`main.py`. The file is created automatically and keeps earlier results across
+experiments and application restarts. It records the dataset, model, accuracy,
+training count, test count, and correct prediction count. Accuracy is stored as
+a fraction: for example, 0.933333 means approximately 93.33%.
+
+The column headings are written once for a new or empty file. Cancelled or
+failed experiments do not add rows. If saving fails, the application displays
+an error and continues. Results are saved locally; they are not automatically
+uploaded to GitHub.
+
 ## Data preparation
 
 The supplied CSVs in `data/` are unchanged. The summary displays rows, columns,
@@ -51,13 +64,11 @@ Every model uses median imputation.
 | --- | --- |
 | `choose_option` | Display a menu and validate its selection. |
 | `ask_repeat` | Validate a yes/no answer. |
-| `load_dataset` | Load a CSV and explain file errors. |
-| `show_summary` | Display dimensions, classes, and missing values. |
-| `prepare_features` | Separate features and labels; validate usable data. |
+| `load_and_prepare` | Load and summarize a CSV, separate features and labels, and validate usable data. |
 | `create_pipeline` | Create preprocessing and the selected classifier. |
-| `train_and_evaluate` | Split, train, predict, and calculate accuracy. |
-| `show_result` | Display choices, split sizes, and results. |
-| `main` | Coordinate experiments, recovery, repetition, and exit. |
+| `train_and_evaluate` | Split, train, predict, and return accuracy, counts, and the fitted pipeline. |
+| `main` | Coordinate menus, display and save results, handle errors, repeat, and exit. |
+| `save_result` | Append a result row to the CSV and handle file-writing errors. |
 
 ## Validation
 
@@ -67,11 +78,15 @@ Checks confirmed training-only imputation and scaling, target exclusion,
 disjoint training/test rows, and independently calculated accuracy.
 Invalid numbers, words, blank input, repeat answers, file errors, insufficient
 data, repeated experiments, and clean exits were also checked.
+CSV checks confirmed correct values, one header, appending across experiments
+and application restarts, and handling of write failures. The final ZIP was
+extracted, its dependencies installed, and the application run successfully.
 
 ## AI assistance and limitations
 
-OpenAI Codex assisted with implementation, documentation, and debugging;
-generated code was reviewed and validated through execution and independent
-checks. The application supports the three supplied numeric datasets and fixed
+OpenAI Codex helped plan and generate code; the resulting code was checked by
+running the application.
+
+The application supports the three supplied numeric datasets and fixed
 model settings. Results use one reproducible test split. Windows and Linux
 execution were not tested.
